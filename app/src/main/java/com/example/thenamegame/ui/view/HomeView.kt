@@ -20,16 +20,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.thenamegame.R
+import com.example.thenamegame.nav.ProfileNavEnum
 import com.example.thenamegame.ui.theme.ButtonColor
 import com.example.thenamegame.ui.theme.Primary
 
-@Preview
 @Composable
-fun Home() {
+fun HomeView(navController: NavController) {
     Surface(modifier = Modifier.fillMaxSize(), color = Primary) {
         Image(
             painter = painterResource(id = R.drawable.home_background),
@@ -52,10 +52,10 @@ fun Home() {
                 fontWeight = FontWeight.Medium
             )
             HomeButton {
-
+                navController.navigate(route = ProfileNavEnum.DETAIL.name + "/${ProfileNavEnum.MODE_PRACTICE}")
             }
             HomeButton {
-
+                navController.navigate(route = ProfileNavEnum.DETAIL.name + "/${ProfileNavEnum.MODE_TIMED}")
             }
         }
     }
