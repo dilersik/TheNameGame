@@ -51,10 +51,10 @@ fun HomeView(navController: NavController) {
                 color = Color.White,
                 fontWeight = FontWeight.Medium
             )
-            HomeButton {
+            HomeButton(R.string.practice_mode_btn) {
                 navController.navigate(route = ProfileNavEnum.DETAIL.name + "/${ProfileNavEnum.MODE_PRACTICE}")
             }
-            HomeButton {
+            HomeButton(R.string.timed_mode_btn) {
                 navController.navigate(route = ProfileNavEnum.DETAIL.name + "/${ProfileNavEnum.MODE_TIMED}")
             }
         }
@@ -62,7 +62,7 @@ fun HomeView(navController: NavController) {
 }
 
 @Composable
-private fun HomeButton(onClick: () -> Unit) {
+private fun HomeButton(text: Int, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         modifier = Modifier
@@ -72,6 +72,6 @@ private fun HomeButton(onClick: () -> Unit) {
         colors = ButtonDefaults.buttonColors(ButtonColor),
         shape = RoundedCornerShape(14.dp),
     ) {
-        Text(text = stringResource(R.string.practice_mode_btn), fontSize = 20.sp)
+        Text(text = stringResource(text), fontSize = 20.sp)
     }
 }

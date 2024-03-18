@@ -8,9 +8,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.thenamegame.ui.view.HomeView
 import com.example.thenamegame.ui.view.ProfilesView
+import com.example.thenamegame.ui.view.ProfilesViewModel
 
 @Composable
-fun Nav() {
+fun Nav(viewModel: ProfilesViewModel) {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = ProfileNavEnum.HOME.name) {
         composable(ProfileNavEnum.HOME.name) {
@@ -23,7 +24,7 @@ fun Nav() {
                 type = NavType.StringType
             })
         ) {
-            ProfilesView(navController, mode = it.arguments?.getString(ProfileNavEnum.PARAM_NAME_MODE))
+            ProfilesView(viewModel, navController, mode = it.arguments?.getString(ProfileNavEnum.PARAM_NAME_MODE))
         }
     }
 }

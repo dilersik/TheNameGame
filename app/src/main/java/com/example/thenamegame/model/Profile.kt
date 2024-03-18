@@ -7,6 +7,6 @@ data class Profile(
     val jobTitle: String,
     val lastName: String,
     val slug: String,
-    val socialLinks: List<String?>,
+    val socialLinks: List<SocialLink>,
     val type: String,
 )
