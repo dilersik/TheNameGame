@@ -6,9 +6,6 @@ data class ProfileHeadshot(
     val id: String,
     val mimeType: String,
     val type: String,
-    private var _url: String,
+    val url: String?,
     val width: Int,
-) {
-    val url: String
-        get() = _url.replace("https", "http")
-}
+)

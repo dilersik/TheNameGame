@@ -6,9 +6,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -66,27 +66,30 @@ fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mod
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    LazyColumn {
-                        items(profiles) {
+                    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                        items(profiles) { profile ->
                             Card(
                                 modifier = Modifier
-                                    .size(340.dp)
-                                    .padding(6.dp),
+                                    .height(150.dp)
+                                    .padding(6.dp)
+                                    .weight(.5f),
                                 elevation = CardDefaults.cardElevation(6.dp),
                             ) {
-                                val painter = rememberAsyncImagePainter(
-                                    model = ImageRequest.Builder(LocalContext.current)
-                                        .data(it.headshot.url)
-                                        .crossfade(true)
-                                        .transformations(RoundedCornersTransformation())
-                                        .build(),
-                                )
-                                Image(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.FillWidth,
-                                    painter = painter,
-                                    contentDescription = ""
-                                )
+                                profile.headshot.url?.let {
+                                    val painter = rememberAsyncImagePainter(
+                                        model = ImageRequest.Builder(LocalContext.current)
+                                            .data(it.replace("https", "http"))
+                                            .crossfade(true)
+                                            .transformations(RoundedCornersTransformation())
+                                            .build(),
+                                    )
+                                    Image(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.FillWidth,
+                                        painter = painter,
+                                        contentDescription = ""
+                                    )
+                                }
                             }
                         }
                     }
