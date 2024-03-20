@@ -1,5 +1,6 @@
 package com.example.thenamegame.usecase
 
+import android.util.Log
 import com.example.thenamegame.model.Profile
 import com.example.thenamegame.model.ResultWrapper
 import com.example.thenamegame.repository.ProfileRepository
@@ -29,6 +30,7 @@ class ProfileUseCaseImp @Inject constructor(
         withContext(coroutineContext) {
             val randomProfiles = profiles.shuffled().take(6)
             val randomProfile = randomProfiles.random()
+            Log.d("ProfileUseCaseImp", randomProfile.headshot.url.toString())
             Pair(randomProfiles, randomProfile.getFullName())
         }
 

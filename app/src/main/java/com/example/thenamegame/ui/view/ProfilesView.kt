@@ -53,13 +53,14 @@ import coil.transform.RoundedCornersTransformation
 import com.example.thenamegame.R
 import com.example.thenamegame.model.Profile
 import com.example.thenamegame.nav.ProfileNavEnum.Companion.MODE_PRACTICE
+import com.example.thenamegame.nav.ProfileNavEnum.Companion.MODE_TIMED
 import com.example.thenamegame.ui.theme.Primary
 import com.example.thenamegame.ui.theme.Secondary
 
 @Composable
 fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mode: String?) {
     LaunchedEffect(key1 = true) {
-        viewModel.getProfiles()
+        viewModel.getProfiles(mode)
     }
     val loading = viewModel.loading.collectAsState().value
     val currentDataState = viewModel.currentData.collectAsState().value
@@ -71,9 +72,8 @@ fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mod
     } else {
         val profiles = currentDataState.first
         val randomProfile = currentDataState.second
-        val title = stringResource(if (mode == MODE_PRACTICE) R.string.practice_mode else R.string.timed_mode)
 
-        Scaffold(topBar = { Toolbar(title, navController) },
+        Scaffold(topBar = { Toolbar(viewModel, mode, navController) },
             content = { padding ->
                 Surface(
                     modifier = Modifier
@@ -89,7 +89,7 @@ fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mod
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             items(profiles) { profile ->
-                                ItemProfile(viewModel, finishedGame, profile)
+                                ItemProfile(viewModel, mode, profile)
                             }
                         }
                     }
@@ -104,12 +104,16 @@ private fun ShowGameOver(viewModel: ProfilesViewModel, navController: NavControl
     val score = viewModel.count.collectAsState().value
     val total = viewModel.data?.size ?: 0
     AlertDialog(
-        onDismissRequest = { navController.popBackStack() },
+        onDismissRequest = {
+            navController.popBackStack()
+            viewModel.setFinishedGame(false)
+        },
         title = { Text(stringResource(id = R.string.game_over_dialog_title)) },
         text = { Text(stringResource(R.string.game_over_dialog_text, score, total)) },
         confirmButton = {
             Button(onClick = {
                 navController.popBackStack()
+                viewModel.setFinishedGame(false)
             }) {
                 Text("OK")
             }
@@ -118,7 +122,7 @@ private fun ShowGameOver(viewModel: ProfilesViewModel, navController: NavControl
 }
 
 @Composable
-private fun ItemProfile(viewModel: ProfilesViewModel, finishedGame: Boolean, profile: Profile) {
+private fun ItemProfile(viewModel: ProfilesViewModel, mode: String?, profile: Profile) {
     val context = LocalContext.current
     val colorFilter = viewModel.colorFilter.collectAsState().value.second
     val selectedName = viewModel.colorFilter.collectAsState().value.first
@@ -128,8 +132,8 @@ private fun ItemProfile(viewModel: ProfilesViewModel, finishedGame: Boolean, pro
             .fillMaxWidth()
             .height(200.dp)
             .padding(2.dp)
-            .clickable(enabled = !finishedGame) {
-                viewModel.onProfileClick(profile.getFullName())
+            .clickable(enabled = true) {
+                viewModel.onProfileClick(profile.getFullName(), mode)
             },
         shape = RectangleShape,
     ) {
@@ -168,15 +172,25 @@ private fun ItemProfile(viewModel: ProfilesViewModel, finishedGame: Boolean, pro
 }
 
 @Composable
-private fun Toolbar(title: String, navController: NavController) {
+private fun Toolbar(viewModel: ProfilesViewModel, mode: String?, navController: NavController) {
+    val countDownTimer = viewModel.countdownTimer.collectAsState().value
     TopAppBar(
         modifier = Modifier.shadow(elevation = 8.dp, spotColor = Color.DarkGray),
-        title = { Text(text = title) },
+        title = { Text(text = stringResource(if (mode == MODE_PRACTICE) R.string.practice_mode else R.string.timed_mode)) },
         navigationIcon = {
             IconButton({ navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "menu items"
+                )
+            }
+        },
+        actions = {
+            if (mode == MODE_TIMED) {
+                CircularProgressIndicator(
+                    progress = { countDownTimer.toFloat() },
+                    color = Color.White,
+                    trackColor = Primary
                 )
             }
         },
