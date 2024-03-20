@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -99,6 +100,7 @@ fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mod
 @Composable
 private fun ItemProfile(randomProfile: String, profile: Profile) {
     val context = LocalContext.current
+    var isAnswerCorrect by remember { mutableStateOf<Boolean?>(null) }
     var colorFilter by remember { mutableStateOf<ColorFilter?>(null) }
     Card(
         modifier = Modifier
@@ -106,29 +108,38 @@ private fun ItemProfile(randomProfile: String, profile: Profile) {
             .height(200.dp)
             .padding(2.dp)
             .clickable {
-                if (randomProfile == profile.getFullName()) {
-                    colorFilter = ColorFilter.tint(CorrectAnswerColor, BlendMode.Darken)
-                } else {
-                    colorFilter = ColorFilter.tint(WrongAnswerColor, BlendMode.Darken)
-                }
+                isAnswerCorrect = randomProfile == profile.getFullName()
+                colorFilter = ColorFilter.tint(
+                    if (isAnswerCorrect == true)
+                        CorrectAnswerColor else WrongAnswerColor, BlendMode.Darken
+                )
             },
         shape = RectangleShape,
     ) {
-        profile.headshot.url?.let {
-            val painter = rememberAsyncImagePainter(
-                model = ImageRequest.Builder(context)
-                    .data(it.replace("https", "http"))
-                    .crossfade(true)
-                    .transformations(RoundedCornersTransformation())
-                    .build()
-            )
-            Image(
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.FillWidth,
-                painter = painter,
-                contentDescription = "",
-                colorFilter = colorFilter
-            )
+        Box(contentAlignment = Alignment.Center) {
+            profile.headshot.url?.let {
+                val painter = rememberAsyncImagePainter(
+                    model = ImageRequest.Builder(context)
+                        .data(it.replace("https", "http"))
+                        .crossfade(true)
+                        .transformations(RoundedCornersTransformation())
+                        .build()
+                )
+                Image(
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.FillWidth,
+                    painter = painter,
+                    contentDescription = "",
+                    colorFilter = colorFilter
+                )
+                // Draw the mask image on top of the original image
+                isAnswerCorrect?.let { correct ->
+                    Image(
+                        painter = painterResource(if (correct) R.drawable.correct_answer_icon else R.drawable.wrong_answer_icon),
+                        contentDescription = null,
+                    )
+                }
+            }
         }
     }
 }
