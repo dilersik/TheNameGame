@@ -3,22 +3,33 @@ package com.example.thenamegame.usecase
 import com.example.thenamegame.model.Profile
 import com.example.thenamegame.model.ResultWrapper
 import com.example.thenamegame.repository.ProfileRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
-class ProfileUseCaseImp @Inject constructor(private val profileRepository: ProfileRepository) : ProfileUseCase {
+class ProfileUseCaseImp @Inject constructor(
+    private val coroutineContext: CoroutineContext = Dispatchers.IO,
+    private val profileRepository: ProfileRepository
+) : ProfileUseCase {
 
-    override suspend fun getRandomProfilesWithOneName(): ResultWrapper<Pair<List<Profile>, String>?, Boolean, Exception> {
-        val resultWrapper = ResultWrapper<Pair<List<Profile>, String>?, Boolean, Exception>()
+    override suspend fun getAll(): ResultWrapper<List<Profile>?, Boolean, Exception> = withContext(coroutineContext) {
+        val resultWrapper = ResultWrapper<List<Profile>?, Boolean, Exception>()
         val result = profileRepository.getAll()
-        return if (result.data?.isNotEmpty() == true) {
-            val randomProfiles = result.data!!.shuffled().take(6)
-            val randomProfile = randomProfiles.random()
-            resultWrapper.data = Pair(randomProfiles, randomProfile.getFullName())
+        return@withContext if (result.data?.isNotEmpty() == true) {
+            resultWrapper.data = result.data
             resultWrapper
         } else {
             resultWrapper.exception = Exception("No profiles found")
             resultWrapper
         }
     }
+
+    override suspend fun getRandomProfilesWithOneName(profiles: List<Profile>): Pair<List<Profile>, String> =
+        withContext(coroutineContext) {
+            val randomProfiles = profiles.shuffled().take(6)
+            val randomProfile = randomProfiles.random()
+            Pair(randomProfiles, randomProfile.getFullName())
+        }
 
 }

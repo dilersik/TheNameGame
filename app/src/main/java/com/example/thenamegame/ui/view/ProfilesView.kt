@@ -29,10 +29,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -54,21 +51,21 @@ import coil.transform.RoundedCornersTransformation
 import com.example.thenamegame.R
 import com.example.thenamegame.model.Profile
 import com.example.thenamegame.nav.ProfileNavEnum.Companion.MODE_PRACTICE
-import com.example.thenamegame.ui.theme.CorrectAnswerColor
 import com.example.thenamegame.ui.theme.Primary
 import com.example.thenamegame.ui.theme.Secondary
-import com.example.thenamegame.ui.theme.WrongAnswerColor
 
 @Composable
 fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mode: String?) {
     LaunchedEffect(key1 = true) {
         viewModel.getProfiles()
     }
-    if (viewModel.data.value.loading == true) {
+    val loading = viewModel.loading.collectAsState().value
+    val currentDataState = viewModel.currentData.collectAsState().value
+    if (loading) {
         CircularProgressBar()
     } else {
-        val profiles = viewModel.data.value.data?.first ?: emptyList()
-        val randomProfile = viewModel.data.value.data?.second ?: ""
+        val profiles = currentDataState.first
+        val randomProfile = currentDataState.second
         val title = stringResource(if (mode == MODE_PRACTICE) R.string.practice_mode else R.string.timed_mode)
 
         Scaffold(topBar = { Toolbar(title, navController) },
@@ -87,7 +84,7 @@ fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mod
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             items(profiles) { profile ->
-                                ItemProfile(randomProfile, profile)
+                                ItemProfile(viewModel, profile)
                             }
                         }
                     }
@@ -98,21 +95,18 @@ fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mod
 }
 
 @Composable
-private fun ItemProfile(randomProfile: String, profile: Profile) {
+private fun ItemProfile(viewModel: ProfilesViewModel, profile: Profile) {
     val context = LocalContext.current
-    var isAnswerCorrect by remember { mutableStateOf<Boolean?>(null) }
-    var colorFilter by remember { mutableStateOf<ColorFilter?>(null) }
+    val colorFilter = viewModel.colorFilter.collectAsState().value.second
+    val selectedName = viewModel.colorFilter.collectAsState().value.first
+    val maskImage = viewModel.maskImage.collectAsState().value.second
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(200.dp)
             .padding(2.dp)
-            .clickable {
-                isAnswerCorrect = randomProfile == profile.getFullName()
-                colorFilter = ColorFilter.tint(
-                    if (isAnswerCorrect == true)
-                        CorrectAnswerColor else WrongAnswerColor, BlendMode.Darken
-                )
+            .clickable(enabled = true) {
+                viewModel.onProfileClick(profile.getFullName())
             },
         shape = RectangleShape,
     ) {
@@ -125,19 +119,25 @@ private fun ItemProfile(randomProfile: String, profile: Profile) {
                         .transformations(RoundedCornersTransformation())
                         .build()
                 )
+                val newColorFilter =
+                    if (colorFilter != null && selectedName == profile.getFullName())
+                        ColorFilter.tint(colorFilter, BlendMode.Darken)
+                    else null
                 Image(
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.FillWidth,
                     painter = painter,
                     contentDescription = "",
-                    colorFilter = colorFilter
+                    colorFilter = newColorFilter
                 )
                 // Draw the mask image on top of the original image
-                isAnswerCorrect?.let { correct ->
-                    Image(
-                        painter = painterResource(if (correct) R.drawable.correct_answer_icon else R.drawable.wrong_answer_icon),
-                        contentDescription = null,
-                    )
+                if (selectedName == profile.getFullName()) {
+                    maskImage?.let { maskImageRes ->
+                        Image(
+                            painter = painterResource(maskImageRes),
+                            contentDescription = null,
+                        )
+                    }
                 }
             }
         }

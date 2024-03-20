@@ -33,6 +33,6 @@ object AppModule {
     @Singleton
     @Provides
     fun provideProfileUseCase(profileRepository: ProfileRepository): ProfileUseCase =
-        ProfileUseCaseImp(profileRepository)
+        ProfileUseCaseImp(profileRepository = profileRepository)
 
 }
