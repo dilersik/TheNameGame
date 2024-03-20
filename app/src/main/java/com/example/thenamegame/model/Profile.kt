@@ -9,4 +9,6 @@ data class Profile(
     val slug: String,
     val socialLinks: List<SocialLink>,
     val type: String,
-)
+) {
+    fun getFullName() = firstName + " " + lastName
+}

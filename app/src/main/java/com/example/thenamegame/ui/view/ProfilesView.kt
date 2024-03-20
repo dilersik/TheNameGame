@@ -3,6 +3,7 @@
 package com.example.thenamegame.ui.view
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,9 +29,16 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -43,9 +51,12 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.example.thenamegame.R
+import com.example.thenamegame.model.Profile
 import com.example.thenamegame.nav.ProfileNavEnum.Companion.MODE_PRACTICE
+import com.example.thenamegame.ui.theme.CorrectAnswerColor
 import com.example.thenamegame.ui.theme.Primary
 import com.example.thenamegame.ui.theme.Secondary
+import com.example.thenamegame.ui.theme.WrongAnswerColor
 
 @Composable
 fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mode: String?) {
@@ -59,24 +70,7 @@ fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mod
         val randomProfile = viewModel.data.value.data?.second ?: ""
         val title = stringResource(if (mode == MODE_PRACTICE) R.string.practice_mode else R.string.timed_mode)
 
-        Scaffold(topBar = {
-            TopAppBar(
-                title = { Text(text = title) },
-                navigationIcon = {
-                    IconButton({ navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "menu items"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    titleContentColor = Color.White,
-                    containerColor = Secondary,
-                    navigationIconContentColor = Color.White
-                ),
-            )
-        },
+        Scaffold(topBar = { Toolbar(title, navController) },
             content = { padding ->
                 Surface(
                     modifier = Modifier
@@ -92,29 +86,7 @@ fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mod
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             items(profiles) { profile ->
-                                Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(200.dp)
-                                        .padding(2.dp),
-                                    shape = RectangleShape,
-                                ) {
-                                    profile.headshot.url?.let {
-                                        val painter = rememberAsyncImagePainter(
-                                            model = ImageRequest.Builder(LocalContext.current)
-                                                .data(it.replace("https", "http"))
-                                                .crossfade(true)
-                                                .transformations(RoundedCornersTransformation())
-                                                .build(),
-                                        )
-                                        Image(
-                                            modifier = Modifier.fillMaxSize(),
-                                            contentScale = ContentScale.FillWidth,
-                                            painter = painter,
-                                            contentDescription = ""
-                                        )
-                                    }
-                                }
+                                ItemProfile(randomProfile, profile)
                             }
                         }
                     }
@@ -122,6 +94,64 @@ fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mod
             }
         )
     }
+}
+
+@Composable
+private fun ItemProfile(randomProfile: String, profile: Profile) {
+    val context = LocalContext.current
+    var colorFilter by remember { mutableStateOf<ColorFilter?>(null) }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+            .padding(2.dp)
+            .clickable {
+                if (randomProfile == profile.getFullName()) {
+                    colorFilter = ColorFilter.tint(CorrectAnswerColor, BlendMode.Darken)
+                } else {
+                    colorFilter = ColorFilter.tint(WrongAnswerColor, BlendMode.Darken)
+                }
+            },
+        shape = RectangleShape,
+    ) {
+        profile.headshot.url?.let {
+            val painter = rememberAsyncImagePainter(
+                model = ImageRequest.Builder(context)
+                    .data(it.replace("https", "http"))
+                    .crossfade(true)
+                    .transformations(RoundedCornersTransformation())
+                    .build()
+            )
+            Image(
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.FillWidth,
+                painter = painter,
+                contentDescription = "",
+                colorFilter = colorFilter
+            )
+        }
+    }
+}
+
+@Composable
+private fun Toolbar(title: String, navController: NavController) {
+    TopAppBar(
+        modifier = Modifier.shadow(elevation = 8.dp, spotColor = Color.DarkGray),
+        title = { Text(text = title) },
+        navigationIcon = {
+            IconButton({ navController.popBackStack() }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "menu items"
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            titleContentColor = Color.White,
+            containerColor = Secondary,
+            navigationIconContentColor = Color.White
+        ),
+    )
 }
 
 @Composable

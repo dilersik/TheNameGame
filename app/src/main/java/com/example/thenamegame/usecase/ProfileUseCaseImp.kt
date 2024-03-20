@@ -13,7 +13,7 @@ class ProfileUseCaseImp @Inject constructor(private val profileRepository: Profi
         return if (result.data?.isNotEmpty() == true) {
             val randomProfiles = result.data!!.shuffled().take(6)
             val randomProfile = randomProfiles.random()
-            resultWrapper.data = Pair(randomProfiles, randomProfile.firstName + " " + randomProfile.lastName)
+            resultWrapper.data = Pair(randomProfiles, randomProfile.getFullName())
             resultWrapper
         } else {
             resultWrapper.exception = Exception("No profiles found")
