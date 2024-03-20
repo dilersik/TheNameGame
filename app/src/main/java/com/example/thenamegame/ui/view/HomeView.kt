@@ -55,10 +55,10 @@ fun HomeView(navController: NavController) {
                     color = Color.White,
                     fontWeight = FontWeight.Medium
                 )
-                HomeButton(R.string.practice_mode_btn) {
+                HomeButton(R.string.practice_mode) {
                     navController.navigate(route = ProfileNavEnum.DETAIL.name + "/${ProfileNavEnum.MODE_PRACTICE}")
                 }
-                HomeButton(R.string.timed_mode_btn) {
+                HomeButton(R.string.timed_mode) {
                     navController.navigate(route = ProfileNavEnum.DETAIL.name + "/${ProfileNavEnum.MODE_TIMED}")
                 }
             }

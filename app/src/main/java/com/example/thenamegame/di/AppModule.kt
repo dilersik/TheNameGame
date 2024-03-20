@@ -3,6 +3,8 @@ package com.example.thenamegame.di
 import com.example.thenamegame.network.ProfileApi
 import com.example.thenamegame.repository.ProfileRepository
 import com.example.thenamegame.repository.ProfileRepositoryImp
+import com.example.thenamegame.usecase.ProfileUseCase
+import com.example.thenamegame.usecase.ProfileUseCaseImp
 import com.example.thenamegame.util.Constant
 import dagger.Module
 import dagger.Provides
@@ -27,5 +29,10 @@ object AppModule {
     @Singleton
     @Provides
     fun provideProfileRepository(profileApi: ProfileApi): ProfileRepository = ProfileRepositoryImp(profileApi)
+
+    @Singleton
+    @Provides
+    fun provideProfileUseCase(profileRepository: ProfileRepository): ProfileUseCase =
+        ProfileUseCaseImp(profileRepository)
 
 }

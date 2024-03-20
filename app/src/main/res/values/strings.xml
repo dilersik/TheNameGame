@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">TheNameGame</string>
     <string name="home_text">Try matching the WillowTree Employee to their photo</string>
-    <string name="practice_mode_btn">Practice Mode</string>
-    <string name="timed_mode_btn">Timed Mode</string>
+    <string name="practice_mode">Practice Mode</string>
+    <string name="timed_mode">Timed Mode</string>
 </resources>

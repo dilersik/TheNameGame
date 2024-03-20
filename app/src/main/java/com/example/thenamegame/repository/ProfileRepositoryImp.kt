@@ -11,14 +11,14 @@ class ProfileRepositoryImp @Inject constructor(
 ) : ProfileRepository {
 
     override suspend fun getAll(): ResultWrapper<ArrayList<Profile>, Boolean, Exception> {
-        val resultWrapperList = ResultWrapper<ArrayList<Profile>, Boolean, Exception>()
+        val resultWrapper = ResultWrapper<ArrayList<Profile>, Boolean, Exception>()
         try {
-            resultWrapperList.data = api.getAll()
+            resultWrapper.data = api.getAll()
         } catch (e: Exception) {
-            resultWrapperList.exception = e
+            resultWrapper.exception = e
             Log.e(TAG, "getAll: ${e.localizedMessage}")
         }
-        return resultWrapperList
+        return resultWrapper
     }
 
     private companion object {
