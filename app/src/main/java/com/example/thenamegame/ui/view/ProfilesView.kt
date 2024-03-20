@@ -17,6 +17,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -61,6 +63,9 @@ fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mod
     }
     val loading = viewModel.loading.collectAsState().value
     val currentDataState = viewModel.currentData.collectAsState().value
+    val finishedGame = viewModel.finishedGame.collectAsState().value
+
+    if (finishedGame) ShowGameOver(viewModel, navController)
     if (loading) {
         CircularProgressBar()
     } else {
@@ -84,7 +89,7 @@ fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mod
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             items(profiles) { profile ->
-                                ItemProfile(viewModel, profile)
+                                ItemProfile(viewModel, finishedGame, profile)
                             }
                         }
                     }
@@ -95,7 +100,25 @@ fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mod
 }
 
 @Composable
-private fun ItemProfile(viewModel: ProfilesViewModel, profile: Profile) {
+private fun ShowGameOver(viewModel: ProfilesViewModel, navController: NavController) {
+    val score = viewModel.count.collectAsState().value
+    val total = viewModel.data?.size ?: 0
+    AlertDialog(
+        onDismissRequest = { navController.popBackStack() },
+        title = { Text(stringResource(id = R.string.game_over_dialog_title)) },
+        text = { Text(stringResource(R.string.game_over_dialog_text, score, total)) },
+        confirmButton = {
+            Button(onClick = {
+                navController.popBackStack()
+            }) {
+                Text("OK")
+            }
+        }
+    )
+}
+
+@Composable
+private fun ItemProfile(viewModel: ProfilesViewModel, finishedGame: Boolean, profile: Profile) {
     val context = LocalContext.current
     val colorFilter = viewModel.colorFilter.collectAsState().value.second
     val selectedName = viewModel.colorFilter.collectAsState().value.first
@@ -105,7 +128,7 @@ private fun ItemProfile(viewModel: ProfilesViewModel, profile: Profile) {
             .fillMaxWidth()
             .height(200.dp)
             .padding(2.dp)
-            .clickable(enabled = true) {
+            .clickable(enabled = !finishedGame) {
                 viewModel.onProfileClick(profile.getFullName())
             },
         shape = RectangleShape,

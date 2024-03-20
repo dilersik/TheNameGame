@@ -3,4 +3,6 @@
     <string name="home_text">Try matching the WillowTree Employee to their photo</string>
     <string name="practice_mode">Practice Mode</string>
     <string name="timed_mode">Timed Mode</string>
+    <string name="game_over_dialog_title">Game Over</string>
+    <string name="game_over_dialog_text">You scored %s/%s.</string>
 </resources>
