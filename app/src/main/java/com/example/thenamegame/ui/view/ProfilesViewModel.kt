@@ -20,7 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfilesViewModel @Inject constructor(private val profileUseCase: ProfileUseCase) : ViewModel() {
 
-    var data: List<Profile>? = emptyList()
+    var data: List<Profile> = emptyList()
         private set
 
     private val _currentData: MutableStateFlow<Pair<List<Profile>, String>> = MutableStateFlow(Pair(listOf(), ""))
@@ -46,12 +46,15 @@ class ProfilesViewModel @Inject constructor(private val profileUseCase: ProfileU
 
     fun getProfiles(mode: String?) = viewModelScope.launch {
         _loading.value = true
-        _finishedGame.value = false
-        _count.value = 0
-        val result = profileUseCase.getAll()
-        if (result.data?.isNotEmpty() == true) {
-            data = result.data
-            _currentData.value = profileUseCase.getRandomProfilesWithOneName(result.data!!)
+        if (data.isEmpty()) {
+            _countdownTimer.value = 0.0
+            _finishedGame.value = false
+            _count.value = 0
+            val result = profileUseCase.getAll()
+            if (result.data?.isNotEmpty() == true) {
+                data = result.data!!
+                _currentData.value = profileUseCase.getRandomProfilesWithOneName(data)
+            }
         }
         _loading.value = false
         if (mode == ProfileNavEnum.MODE_TIMED)
@@ -75,20 +78,23 @@ class ProfilesViewModel @Inject constructor(private val profileUseCase: ProfileU
     }
 
     fun setFinishedGame(value: Boolean) {
+        data = emptyList()
         _finishedGame.value = value
+        _colorFilter.value = Pair(null, null)
+        _maskImage.value = Pair(null, null)
+        _currentData.value = Pair(listOf(), "")
     }
 
     private suspend fun getRandomProfilesFromCurrentList() {
         delay(1500)
-        if (data?.isNotEmpty() == true) {
+        if (data.isNotEmpty()) {
             _loading.value = true
-            _currentData.value = profileUseCase.getRandomProfilesWithOneName(data!!)
+            _currentData.value = profileUseCase.getRandomProfilesWithOneName(data)
             _loading.value = false
         }
     }
 
     private suspend fun startCountDownTimer() {
-        _countdownTimer.value = 0.0
         _countdownTimer.collect {
             if (it < 1) {
                 delay(1000)

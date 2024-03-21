@@ -10,10 +10,14 @@ class ProfileRepositoryImp @Inject constructor(
     private val api: ProfileApi
 ) : ProfileRepository {
 
-    override suspend fun getAll(): ResultWrapper<ArrayList<Profile>, Boolean, Exception> {
+    private var profiles: ArrayList<Profile>? = null
+
+    override suspend fun getAll(forceApi: Boolean): ResultWrapper<ArrayList<Profile>, Boolean, Exception> {
         val resultWrapper = ResultWrapper<ArrayList<Profile>, Boolean, Exception>()
         try {
-            resultWrapper.data = api.getAll()
+            if (forceApi || profiles == null)
+                profiles = api.getAll()
+            resultWrapper.data = profiles
         } catch (e: Exception) {
             resultWrapper.exception = e
             Log.e(TAG, "getAll: ${e.localizedMessage}")

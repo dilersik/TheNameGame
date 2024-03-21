@@ -4,5 +4,5 @@ import com.example.thenamegame.model.Profile
 import com.example.thenamegame.model.ResultWrapper
 
 interface ProfileRepository {
-    suspend fun getAll(): ResultWrapper<ArrayList<Profile>, Boolean, Exception>
+    suspend fun getAll(forceApi: Boolean = false): ResultWrapper<ArrayList<Profile>, Boolean, Exception>
 }

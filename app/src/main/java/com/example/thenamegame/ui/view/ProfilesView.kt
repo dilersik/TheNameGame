@@ -59,6 +59,7 @@ import com.example.thenamegame.nav.ProfileNavEnum.Companion.MODE_PRACTICE
 import com.example.thenamegame.nav.ProfileNavEnum.Companion.MODE_TIMED
 import com.example.thenamegame.ui.theme.Primary
 import com.example.thenamegame.ui.theme.Secondary
+import com.example.thenamegame.util.Constant.PROFILE_PER_TIME
 
 @Composable
 fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mode: String?) {
@@ -126,14 +127,13 @@ private fun TextName(randomProfile: String) {
 @Composable
 private fun ShowGameOver(viewModel: ProfilesViewModel, navController: NavController) {
     val score = viewModel.count.collectAsState().value
-    val total = viewModel.data?.size ?: 0
     AlertDialog(
         onDismissRequest = {
             navController.popBackStack()
             viewModel.setFinishedGame(false)
         },
         title = { Text(stringResource(id = R.string.game_over_dialog_title)) },
-        text = { Text(stringResource(R.string.game_over_dialog_text, score, total)) },
+        text = { Text(stringResource(R.string.game_over_dialog_text, score, viewModel.data.size / PROFILE_PER_TIME)) },
         confirmButton = {
             Button(onClick = {
                 navController.popBackStack()
@@ -202,7 +202,10 @@ private fun Toolbar(viewModel: ProfilesViewModel, mode: String?, navController: 
         modifier = Modifier.shadow(elevation = 8.dp, spotColor = Color.DarkGray),
         title = { Text(text = stringResource(if (mode == MODE_PRACTICE) R.string.practice_mode else R.string.timed_mode)) },
         navigationIcon = {
-            IconButton({ navController.popBackStack() }) {
+            IconButton({
+                viewModel.setFinishedGame(false)
+                navController.popBackStack()
+            }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "menu items"
