@@ -2,11 +2,13 @@
 
 package com.example.thenamegame.ui.view
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -62,6 +65,7 @@ fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mod
     LaunchedEffect(key1 = true) {
         viewModel.getProfiles(mode)
     }
+    val config = LocalConfiguration.current
     val loading = viewModel.loading.collectAsState().value
     val currentDataState = viewModel.currentData.collectAsState().value
     val finishedGame = viewModel.finishedGame.collectAsState().value
@@ -80,16 +84,30 @@ fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mod
                         .fillMaxSize()
                         .padding(top = padding.calculateTopPadding(), start = 28.dp, end = 28.dp, bottom = 12.dp)
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Spacer(modifier = Modifier.height(42.dp))
-                        Text(text = randomProfile, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Primary)
-                        Spacer(modifier = Modifier.height(20.dp))
-                        LazyVerticalGrid(
-                            columns = GridCells.Adaptive(minSize = 164.dp),
-                            modifier = Modifier.fillMaxWidth()
+                    Row(modifier = Modifier.fillMaxSize()) {
+                        if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                            Column(
+                                modifier = Modifier.weight(0.3f),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                TextName(randomProfile)
+                            }
+                        }
+                        Column(
+                            modifier = Modifier.weight(0.7f),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            items(profiles) { profile ->
-                                ItemProfile(viewModel, mode, profile)
+                            if (config.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                                TextName(randomProfile)
+                            }
+                            Spacer(modifier = Modifier.height(20.dp))
+                            LazyVerticalGrid(
+                                columns = GridCells.Adaptive(minSize = 164.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                items(profiles) { profile ->
+                                    ItemProfile(viewModel, mode, profile)
+                                }
                             }
                         }
                     }
@@ -97,6 +115,12 @@ fun ProfilesView(viewModel: ProfilesViewModel, navController: NavController, mod
             }
         )
     }
+}
+
+@Composable
+private fun TextName(randomProfile: String) {
+    Spacer(modifier = Modifier.height(42.dp))
+    Text(text = randomProfile, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Primary)
 }
 
 @Composable
