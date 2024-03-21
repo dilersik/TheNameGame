@@ -1,13 +1,16 @@
 package com.example.thenamegame.ui.view
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -21,7 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,20 +41,41 @@ import kotlinx.coroutines.delay
 @Composable
 fun HomeView(navController: NavController) {
     val isClicked = remember { mutableStateOf(false) }
+    val config = LocalConfiguration.current
+    val imageBack: Int
+    val imageAlign: Alignment
+    val columnWidthPercentage: Float
+    val rowHorizontal: Arrangement.Horizontal
+    val columVertical: Arrangement.Vertical
+
+    if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        imageBack = R.drawable.home_background_land
+        imageAlign = Alignment.TopStart
+        columnWidthPercentage = 0.4f
+        rowHorizontal = Arrangement.End
+        columVertical = Arrangement.Center
+    } else {
+        imageBack = R.drawable.home_background
+        imageAlign = Alignment.Center
+        columnWidthPercentage = 1f
+        rowHorizontal = Arrangement.Start
+        columVertical = Arrangement.Bottom
+    }
 
     Surface(modifier = Modifier.fillMaxSize(), color = Primary) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Image(
-                painter = painterResource(id = R.drawable.home_background),
-                contentDescription = "",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
+        Image(
+            painter = painterResource(imageBack),
+            contentDescription = "",
+            modifier = Modifier.fillMaxSize(),
+            alignment = imageAlign
+        )
+        Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = rowHorizontal) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 40.dp),
-                verticalArrangement = Arrangement.Bottom,
+                    .fillMaxHeight()
+                    .padding(horizontal = 40.dp)
+                    .widthIn(0.dp, (config.screenWidthDp * columnWidthPercentage).dp),
+                verticalArrangement = columVertical,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
