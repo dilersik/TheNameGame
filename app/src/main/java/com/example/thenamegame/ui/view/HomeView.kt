@@ -14,6 +14,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,9 +33,12 @@ import com.example.thenamegame.R
 import com.example.thenamegame.nav.ProfileNavEnum
 import com.example.thenamegame.ui.theme.ButtonColor
 import com.example.thenamegame.ui.theme.Primary
+import kotlinx.coroutines.delay
 
 @Composable
 fun HomeView(navController: NavController) {
+    val isClicked = remember { mutableStateOf(false) }
+
     Surface(modifier = Modifier.fillMaxSize(), color = Primary) {
         Box(modifier = Modifier.fillMaxSize()) {
             Image(
@@ -55,10 +62,10 @@ fun HomeView(navController: NavController) {
                     color = Color.White,
                     fontWeight = FontWeight.Medium
                 )
-                HomeButton(R.string.practice_mode) {
+                HomeButton(R.string.practice_mode, isClicked, enabled = !isClicked.value) {
                     navController.navigate(route = ProfileNavEnum.DETAIL.name + "/${ProfileNavEnum.MODE_PRACTICE}")
                 }
-                HomeButton(R.string.timed_mode) {
+                HomeButton(R.string.timed_mode, isClicked, enabled = !isClicked.value) {
                     navController.navigate(route = ProfileNavEnum.DETAIL.name + "/${ProfileNavEnum.MODE_TIMED}")
                 }
             }
@@ -67,16 +74,29 @@ fun HomeView(navController: NavController) {
 }
 
 @Composable
-private fun HomeButton(text: Int, onClick: () -> Unit) {
+private fun HomeButton(text: Int, isClicked: MutableState<Boolean>, enabled: Boolean, onClick: () -> Unit) {
     Button(
-        onClick = onClick,
+        onClick = {
+            if (!isClicked.value) {
+                isClicked.value = true
+                onClick()
+            }
+        },
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
             .padding(bottom = 10.dp),
         colors = ButtonDefaults.buttonColors(ButtonColor),
         shape = RoundedCornerShape(14.dp),
+        enabled = enabled
     ) {
         Text(text = stringResource(text), fontSize = 20.sp)
+    }
+    // Reset isClicked after a short delay to allow button clicks again
+    LaunchedEffect(isClicked) {
+        if (isClicked.value) {
+            delay(1000)
+            isClicked.value = false
+        }
     }
 }

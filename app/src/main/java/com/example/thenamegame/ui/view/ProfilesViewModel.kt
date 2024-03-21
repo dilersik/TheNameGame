@@ -47,6 +47,7 @@ class ProfilesViewModel @Inject constructor(private val profileUseCase: ProfileU
     fun getProfiles(mode: String?) = viewModelScope.launch {
         _loading.value = true
         _finishedGame.value = false
+        _count.value = 0
         val result = profileUseCase.getAll()
         if (result.data?.isNotEmpty() == true) {
             data = result.data
